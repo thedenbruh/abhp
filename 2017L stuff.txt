@@ -1,0 +1,341 @@
+ == 2017L (also known as: Vertexia Temporary Client) SCRIPTING ==
+ 
+  - GLOBAL FUNCS (environment, GUI, sound, events):
+   -- schedule(int milliseconds, string script, [arg1, arg2...]) - Used as a form of a "countdown" for future scripts.
+
+   -- define("Name") - Used for defining events, chat commands.
+       (Defining Chat commands):
+       This can be done via define("serverCmdHelloWorld"), where HelloWorld is a command which can be executed via /HelloWorld on client side.
+       For example:
+
+        script = define("serverCmdHelloWorld");
+        script.script = 'messageClient(other.id, "\c5 Hello World!")';
+
+       (Built-in Events):
+       They are seem to be not done yet. But here they are:
+       - onDeath (Player Death event).
+       - onSpawn (Once player spawns).
+       - pickSpawn (Pick spawn event).
+       - onGameConnection (When player joins but has not been authentificated yet).
+       - onTeamPick (Team pick event).
+       - onProjectileHit (new addition yet UNDONE, should be executed when player gets hit by a projectile).
+       - serverCmdChat (/chat command, used in client for sending messages).
+       - serverCmdRespawn (new addition, used for respawning player).
+       - serverCmdQ (new addition, /q command, used for client to quit the game).
+       - serverCmdClear (new addition, /clear command, used for client to clear the chat).
+       - serverCmdHelp (/help command, shows the list of existing commands).
+       - AdditionalHelp (new addition to /help command, used for showing more commands, all defined by host).
+       - serverCmdAvhelp (new addition, works only with -AVULN parameter, /avhelp command, used for client to show the list for /avatar commands).
+       - onClick (new addition, UNDONE).
+       - serverCmdAvatarCLR (works when -AVULN parameter is enabled, /AvatarCLR, used for client to clear his avatar).
+       - serverCmdAvatar (works when -AVULN parameter is enabled, /Avatar, used for client to define his avatar).
+       - serverCmdAvatarPCK (works when -AVULN parameter is enabled, /AvatarPCK, used for client to define packages).
+       - onCompleteAuth (new addition, when client has been fully authentificated).
+      
+       (Regarding avatar commands):
+       /avatar command is a serious vulnerability in 2017L release due to it being open for client.
+       If your API was not configured to filter approved and disapproved assets then a client could be able to wear innapropriate assets.
+       If you would like to try an "authentic" 2017L experience (even though original client is no longer compatible with current host),
+       you may use -AVULN parameter to your host. On client you can try next commands:
+
+       /Avatar Face TShirt Shirt Pants Hat1 Hat2 Hat3 Hat4 Hat5 (defined online assets ID)
+       /AvatarPCK Head LArm RArm Torso LLeg RLeg (defined online assets ID)
+
+   -- print("Hello World!") - Used to print stuff onto Host console.
+ 
+   -- console("Hello World!") - Same but it will be logged and printed in a way, like: [2026-03-22 11:43:01] Hello World!
+
+   -- loadBRK("file pathway") = Used to load Brick Hill Legacy 2017L+ standart set files.
+
+   -- newTeam("Team Name", decimal GM color) - used for Team creation.
+
+   -- newTool("Tool Name") - used for Tool creation. For example (credit: brick-luke):
+
+	s = define("onClick");
+	s.script = '
+	 	var user,sword_length,sword_damage;
+	 	user = arg[0];
+	 	if user.Arm == user.tool[0] {
+	 		sword_length = 4;
+	 		sword_damage = 10;
+	 		with obj_client {
+	 			if(id != user) {
+	 				if(alive) {
+	 					if power(xPos-user.xPos,2)+power(yPos-user.yPos,2)+power((zPos+4*zScale)-(user.zPos+2.5*zScale),2) <= power(sword_length,2) {
+	 						playerAddDamage(id,sword_damage);
+	 						if playerGetHealth(id) <= 0 {
+	 							playerKill(id);
+	 							playerSetHealth(id,100);
+	 							messageAll(user.name+" killed "+name);
+	 							user.Score += 1;
+	 						}
+	 					}
+	 				}
+	 			}
+	 		}
+	 	}
+	 ';
+
+   -- Projectiles:
+      (explanation):
+      Projectiles is a backport feature from Brick Hill Legacy. Used to originally bring back the snowball script made by brick-luke.
+      (functions):
+      - newProjectile(int: diameter, int: color, float: px, float: py, float: pz, int: dir, int: dirz, int: vel)
+      - projectileDestroy(projectile id)
+
+   -- Environment:
+       (new functions):
+      - envSetBaseSize(int: baseplate size) - Changes the Baseplate size.
+      - envSetBaseColor(int: decimal GM color) - Changes the Baseplate color.
+      - envSetSky(int: decimal GM color) - Changes the Sky color.
+      - envSetAmbient(int: decimal GM color) - Changes the Ambient color.
+      - envSetFog(int: decimal GM color (FogColor), int: FogStart, int: FogEnd) - Changes the fog parameters (new addition)
+      - weatherChange(string: WeatherType) - Changes the Weather type (Backport from Brick Hill Legacy)
+      - weatherChangeClient(string: WeatherType, int: Client Network ID) - Changes the Weather type for one client.
+      - changeMOTD(string: Message of the Day) - Changes Message of the Day (new addition)
+      - clearMap() - Clears map.
+
+       (Compatibility Alias, used for backwards compatibility with classic scripts made circa the October 2017 release):
+      - environmentSetBaseplateSize(int: baseplate size) - Works as envSetBaseSize
+      - environmentSetBaseplateColor(int: decimal GM color) - Works as envSetBaseColor
+      - environmentSetSky(int: decimal GM color) - Works as envSetSky
+      - environmentSetAmbient(int: decimal GM color) - Works as envSetAmbient
+      - environmentSetFog(int: decimal GM color (FogColor), int: FogStart, int: FogEnd) - Works as envSetFog. Although this is a new addition, 
+        envSetFog may be misused as environmentSetFog due to similar Environment setting function names.
+
+   -- GUI:
+      (explanation):
+     GUI is a relatively new addition to Vertexia Temporary Client which is pretty much unseen in all kinds of Brick Hill Revivals.
+     GUI can be used as a "beautifier" as well as an analog to Brick Hill's classic method of GUI (as you know: top, center and bottom texts).
+     The main reason why Brick Hill's GUI is so bad is its limitation in possibilites. You cannot make stuff without using ASCII art which is
+     too old to understand for Roblox refugees, for example. Thank God, you are able to do that via built-in new functions.
+     
+     Besides custom UI, you are also able to disable client's CoreGUI. To do that, check editing GUI sub-chapter.
+
+      (Why there's no Input UI (buttons, textboxes, etc.)?)
+     As of currently, you're using a development (pretty much early beta I can guess). It's own workaround would be using them as a layer to commands.
+     Although it sounds easy, making them would be as quite hard as non-input GUIS. In short, it's not done yet.
+
+      (BBCode implementation explained):
+     With the port from Danyal Assi's Early 2017 Client (which for some magic reason was not obfuscated which is indeed, magic) it became possible to
+     adapt the draw_text_rtf function (basically BBCode) to Brick Hill Legacy standarts. With that, Brick Hill Legacy \c chat colors were also adapted
+     to this function, making it more backwards compatible.
+
+      (BBCode tags):
+     - [b]: Bold text.
+     - [i]: Italic text. (can be used as [b][i] for bold italic text)
+     - [c=(string: hex (without #) )]: Colored text. For example: [c=00FF00]pure green[/c]
+     - [g]: Bigger text (unstable in chat).
+
+      (Object overview):
+     As of current, Host can send 8 kinds of UI:
+     - obj_extPrint (Extended print, an analog to top,center,bottom print UI objects)
+     - obj_rect (Rectangle)
+     - obj_roundrect (Round Rectangle)
+     - obj_img (Image)
+     - obj_line (Line)
+     - obj_extPrompt (Extended Prompt)
+     - obj_circle (Circle)
+     - obj_point (Point, most simple UI object)
+
+      (Editable variables):
+     - pID (as Object ID) - common across all kinds of UI.
+
+     - posx and posy (as first position by x,y) - used in obj_extPrint, obj_img.
+     - posx and posy (as second position by x,y) - used in obj_rect, obj_roundrect.
+
+     - xs, ys (as first position by x,y) - used in obj_rect, obj_roundrect.
+     - xs, ys (as scale values by x,y) - used in obj_img.
+
+     - x1,y1,x2,y2 (as first and second position by x,y) - used in obj_line, obj_circle, obj_point.
+
+     - text - used in obj_extPrompt, obj_extPrint.
+     - time - used in obj_extPrompt.
+     - outline (bool) - used in obj_rect, obj_roundrect, obj_circle.
+     - r (radius, float) - used in obj_circle.
+     - color (int, uses decimal GameMaker color) - used in obj_rect, obj_roundrect, obj_circle, obj_point.
+     - alpha (float, transparency) - used in obj_line, obj_rect, obj_roundrect, obj_circle, obj_img.
+     - img (Online image id) - used in obj_img.
+     - color1, color2 (gradient colors) - used in obj_line.
+     - rot (integer) - used in obj_img.
+
+     - locall (is the UI local to user? bool), cid (int: Client network ID) - common across all kinds of UI.
+
+      (Global UI variables, use with global.varname):
+     - user (local change) - same as cid.
+     - GUI_chat (default: true).
+     - GUI_leaderboard (default: true).
+     - GUI_healthbar (default: true).
+     - GUI_slots (default: true).
+
+      (creation functions):
+     - newExtPrint(posx, posy, text, [locall, cid]) - Creates a Custom text UI, can be used with BBCode.
+     - newRect(xs, ys, posx, posy, outline, color, alpha, [locall, cid]) - Creates new Rectangle. 
+     - newRoundRect(xs, ys, posx, posy, outline, color, alpha, [locall, cid]) - Creates new Round Rectangle.
+     - newImg(img, posx, posy, xs, ys, rot, alpha, [locall, cid]) - Creates new Image.
+     - newExtPrompt(text, time, [locall, cid]) - Creates a timed Prompt message (in Brick Hill Legacy way).
+     - newLine(x1, y1, x2, y2, color1, color2, alpha, [locall, cid]) - Creates new line. Color1 and Color2 variables are used as a gradient, you can use one color to both of them.
+     - newPoint(x1, y1, color, [locall, cid]) - Creates a pixel, but in GameMaker it is defined as "Point". Using too many of them will lead to horrible performance (try out newImg if you want so, unless you're making a "game in game" :) ).
+     - newCircle(x1, y1, r, outline, color, alpha, [locall, cid]) - creates a Circle.
+
+       (editing GUIs):
+     To enable/disable CoreGUI (chat, health bar, inventory slots, leaderboard) you can use:
+      - editCoreGUI(user, GUI_chat, GUI_leaderboard, GUI_healthbar, GUI_slots) - for local change (player-related).
+      - editCoreGUIGlobal(GUI_chat, GUI_leaderboard, GUI_healthbar, GUI_slots) - for global change.
+
+     To edit a UI object, you need to use the same script, BUT change new to edit and also add an object id at start. 
+     For example: editPoint(int: object id, int: x, int: y, int: decimal GM color). Although this is technically possible to
+     list every GUI object in your console, this would be impossible to edit them all because of Host being unable to scroll through the logs.
+     So, besides using listGUI(obj_extPrint or obj_img or obj_extPrompt) editing is simply done via using the object id from an already created object.
+     GUI scripting in this case can be done in two ways:
+
+1. 
+schedule(1000, "newExtPrompt('it is gonna go nuts in 5', 1)")
+schedule(2000, "newExtPrompt('it is gonna go nuts in 4', 1)")
+schedule(3000, "newExtPrompt('it is gonna go nuts in 3', 1)")
+schedule(4000, "newExtPrompt('it is gonna go nuts in 2', 1)")
+schedule(5000, "newExtPrompt('it is gonna go nuts in 1', 1)")
+
+or...
+
+2. 
+var countdown;
+ countdown = newExtPrompt('This is gonna go nuts in 5', 5);
+ with countdown {
+  schedule(1000, "editExtPrompt(pID, 'it is gonna go nuts in 4', 4)")
+  schedule(2000, "editExtPrompt(pID, 'it is gonna go nuts in 3', 3)")
+  schedule(3000, "editExtPrompt(pID, 'it is gonna go nuts in 2', 2)")
+  schedule(4000, "editExtPrompt(pID, 'it is gonna go nuts in 1', 1)")
+ }
+
+       (removing GUIs):
+     To remove an UI object you may use removeGUI(obj, ID).
+     To remove all UI objects you may use removeGUI("all").
+     To remove all UI objects and disable all CoreGUIs you may use removeGUI("core-all").
+     To disable all CoreGUIs you may use removeGUI("core").
+
+     For example:
+
+var text;
+ text = newExtPrint(100, 100, '\c5 This text will appear for 5 seconds.');
+ with text{
+  schedule(5000, "removeGUI(obj_extPrint, pID);")
+ }
+
+
+   -- Sound:
+      (explanation):
+     This is also a new addition to the temporary client, though it was firstly done in Sandpile. Besides Sandpile, its implementation is poor due to
+     GameMaker 8.1 Limitations. We could've used GameMaker 8.2 Extensions if the Host wouldn't break at start with them.
+ 
+      (Variables):
+     - sID (Object ID)
+     - soID (Online Music ID)
+     - loop (can be this object looped? bool)
+     - active (is this sound active? bool)
+     - locall (is this object local? bool)
+     - cid (int: client network id)
+
+      (functions):
+     - newSound(soID, loop, active, [locall, cid]) - creates a sound object.
+     - editSound(sID, soID, loop, active) - edits an existing sound object.
+     - changeSoundLocal(sID, soID, loop, active, cid) - edits an existing sound object for a Client.
+     - removeSound(sID) - removes a sound object.
+     - removeSoundLocal(sID, cid) - removes a sound object for Player.
+     - removeAllSounds() - removes all Sound objects.
+     - removeAllLocalSounds() - removes all Local Sound objects.
+
+   -- Brick creation
+      (explanation, editable variables):
+      With recent updates to Vertexia temporary client, you are now able to assign next variables:
+      - alive (bool)
+      - xPos (position by x)
+      - yPos (position by y)
+      - zPos (position by z)
+      - xScale (scale by x)
+      - yScale (scale by y)
+      - zScale (scale by z)
+      - Color (defined for r g b values)
+      - Alpha (transparency)
+      - Name (should not be customly assigned since it's assigned as brickCount)
+      - customName (that's what you should use instead, can be used with displayname bool, default "")
+      - Shape (default="", other values: slope, plate, wedge, spawnpoint, arch, corner, corner_inv, dome, bars, flag, pole, round, cylinder, round_slope, vent)
+      - Rotation (default 0)
+      - TopSticker (default "", online image ID)
+      - BottomSticker (default "", online image ID)
+      - NorthSticker (default "", online image ID)
+      - EastSticker (default "", online image ID)
+      - SouthSticker (default "", online image ID)
+      - WestSticker (default "", online image ID)
+      - Model (default "", online model ID)
+      - Mxs (Model scale by X, default 0)
+      - Mys (Model scale by y, default 0)
+      - Mzs (Model scale by z, default 0)
+      - LightRange (default 0)
+      - LightColor (default 0)
+      - Collision (BROKEN, do not use. Default true)
+      - isVisible (Default true)
+      - textureless (new addition, default false) - If true, the brick will have no texture.
+      - displayname (new addition, default false) - If true, customname variable will be displayed on top of the brick.
+      - Script
+      - EXECUTED (all bricks are executed during loadBRK, default false but later becomes true)
+      (new attributes):
+      From now on, in a .brk file you are able to assign next attributes:
+        +MODEL 3 0.05 0.05 0.05 (Model Online ID, Mxs, Mys, Mzs)
+	+CUSTOMNAME "Hello World!" (customname variable)
+	+DISPLAYNAME (makes brick to show customname variable)
+	+NOTEXTURE (makes brick textureless)
+	+TSTICKER 1 (TopSticker Online ID equals 1)
+	+BSTICKER 1 (BottomSticker Online ID equals 1)
+	+NSTICKER 1 (NorthSticker Online ID equals 1)
+	+ESTICKER 1 (EastSticker Online ID equals 1)
+	+SSTICKER 1 (SouthSticker Online ID equals 1)
+	+WSTICKER 1 (WestSticker Online ID equals 1)
+      (Scripting assignment):
+      It can be done in two ways
+
+1. .brk File:
+
+-9 12 33 8 8 1 0.5 0.5 0.5 1
+	
+	+NAME platform
+	+SCRIPT platform = self.id;
+	+SCRIPT 
+	+SCRIPT anchorX = platform.xPos;
+	+SCRIPT anchorY = platform.yPos;
+	+SCRIPT anchorZ = platform.zPos;
+	+SCRIPT 
+	+SCRIPT frequency = 0.010;
+	+SCRIPT amplitude = 1;
+	+SCRIPT timer = 0;
+	+SCRIPT moving = '
+	+SCRIPT 
+	+SCRIPT x2 = anchorX + sin(timer*frequency)*amplitude;
+	+SCRIPT y2 = anchorY + sin(timer*frequency)*amplitude;
+	+SCRIPT z2 = anchorZ - sin(timer*frequency)*amplitude;
+	+SCRIPT 
+	+SCRIPT timer += 1;
+	+SCRIPT 
+	+SCRIPT brickTranslate(platform, platform.xPos, platform.yPos, z2);
+	+SCRIPT 
+	+SCRIPT schedule(0, moving);
+	+SCRIPT ';
+	+SCRIPT execute_string(moving);
+	+SCRIPT 
+
+2. Host console method of scripting:
+
+var nut;
+nut = newBrick(3,3,3,1,1,1,c_aqua,1);
+nut.displayname = true;
+nut.customName = "hello i am a test brick";
+sendBrick(nut)
+
+with nut { 
+schedule(2000, "brickSetCName(brickID, 'hello this got changed')")
+schedule(5000, "brickSetDName(brickID, 0)")
+schedule(7000, "brickSetDName(brickID, 1)")
+}
+
+      (Enabling Brick Physics):
+      Done via brickKill(brick ID).
