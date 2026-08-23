@@ -1,12 +1,10 @@
 <?php 
 
-error_reporting(0);
-
 /* GET stuff... */
-$weed = $_GET['req'];
-$type = $_GET['type'];
-$id = $_GET['id'];
-$format = $_GET['f'];
+$weed = $_GET['req'] ?? '';
+$type = $_GET['type'] ?? '';
+$id = $_GET['id'] ?? '';
+$format = $_GET['f'] ?? '';
 
 /* random shitt */
 switch ($weed) {
