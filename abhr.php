@@ -172,8 +172,10 @@ switch ($weed) {
         break;
         case 2:
         header('Content-type: image/png');
-	$additions = $id.".png";
+		$additions = $id.".png";
         $im = imageCreateFromPng($file.$additions);
+    	imageflip($im, IMG_FLIP_HORIZONTAL);
+    	imageflip($im, IMG_FLIP_VERTICAL);
         imagealphablending( $im, false );
         imagesavealpha( $im, true );
         imagepng($im);
